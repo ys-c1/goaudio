@@ -7,4 +7,5 @@ var (
 	ErrFrames     = errors.New("帧数必须为正")
 	ErrFormat     = errors.New("WAV 头非法")
 	ErrFreq       = errors.New("频率必须为正且低于采样率一半")
+	ErrFrameSize  = errors.New("帧长必须为正")
 )
