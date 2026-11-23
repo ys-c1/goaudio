@@ -2,7 +2,13 @@ package audio
 
 import "math"
 
+// Sine 保持原单曲路径与输出不变，等价于初相位 0 的 SinePhase。
 func Sine(c *Clip, freq float64, amp int) error {
+	return SinePhase(c, freq, amp, 0)
+}
+
+// SinePhase 在 Sine 基础上增加初相位 phase（弧度），用于构造硬切处相位错开的素材。
+func SinePhase(c *Clip, freq float64, amp int, phase float64) error {
 	if freq <= 0 || freq >= float64(c.Rate)/2 {
 		return ErrFreq
 	}
@@ -11,7 +17,9 @@ func Sine(c *Clip, freq float64, amp int) error {
 	}
 	for i := range c.Frames {
 		t := float64(i) / float64(c.Rate)
-		c.Frames[i] = int16(float64(amp) * math.Sin(2*math.Pi*freq*t))
+		// 统一使用四舍五入取整（与交叉淡化 blend 的 round 规则一致），
+		// 避免 int16(float) 向零截断带来的 1 LSB 偏差。
+		c.Frames[i] = int16(math.Round(float64(amp) * math.Sin(2*math.Pi*freq*t+phase)))
 	}
 	return nil
 }
